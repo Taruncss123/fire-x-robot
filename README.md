@@ -171,4 +171,5 @@ MQTT_BROKER_URL=mqtt://broker.emqx.io:1883
 - [x] **5-Minute Telemetry Log**: Stored batch records, trend graph, and instant CSV export button.
 - [x] **Built-in Demo Simulator**: Complete fire incident scenario (gas rise → thermal hotspot → fire confirmation → water suppression → cool-down).
 #   f i r e - x - r o b o t - 2  
+ #   f i r e - x - r o b o t - 2  
  
