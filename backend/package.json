@@ -1,0 +1,17 @@
+{
+  "name": "fire-x-backend",
+  "version": "1.0.0",
+  "description": "FIRE-X Command Center Bridge Backend: Express, WebSockets, MQTT & Firebase",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mqtt": "^5.5.3",
+    "ws": "^8.17.0"
+  }
+}
