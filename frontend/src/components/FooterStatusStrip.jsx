@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Wifi, Radio, Database, Shield, Activity, Clock } from "lucide-react";
+import { Radio, Database, Shield, Activity } from "lucide-react";
 
 export default function FooterStatusStrip({ 
   robotConnected = false, 
@@ -13,74 +13,74 @@ export default function FooterStatusStrip({
 }) {
   let linkBadge = {
     label: "LIVE ROVER LINK",
-    color: "text-emerald-400 bg-emerald-950/80 border-emerald-500/40",
-    dot: "bg-emerald-400 animate-pulse"
+    color: "text-emerald-800 bg-emerald-50 border-emerald-300",
+    dot: "bg-emerald-500 animate-pulse"
   };
 
   if (isDemoMode) {
     linkBadge = {
       label: "DEMO SIMULATOR",
-      color: "text-amber-400 bg-amber-950/80 border-amber-500/40",
-      dot: "bg-amber-400 animate-pulse"
+      color: "text-amber-800 bg-amber-50 border-amber-300",
+      dot: "bg-amber-500 animate-pulse"
     };
   } else if (!robotConnected || isStale) {
     linkBadge = {
       label: isStale ? "STALE (>5s) LINK" : "DISCONNECTED",
-      color: "text-zinc-400 bg-zinc-900 border-zinc-700",
-      dot: "bg-zinc-600"
+      color: "text-stone-500 bg-stone-100 border-stone-300",
+      dot: "bg-stone-400"
     };
   }
 
   const mqttConnected = mqttStatus === "CONNECTED";
 
   return (
-    <footer className="mt-6 border-t border-[#252830] bg-[#121316]/90 backdrop-blur px-3 sm:px-6 py-2.5 text-xs font-mono">
-      <div className="max-w-[1720px] mx-auto flex flex-wrap items-center justify-between gap-3 text-[#A6987E]">
+    <footer className="mt-6 border-t border-[#D4C9B8] bg-[#F8F4EF]/95 backdrop-blur px-4 sm:px-6 xl:px-8 py-3 text-xs font-mono">
+      <div className="w-full mx-auto flex flex-wrap items-center justify-between gap-3 text-[#6B5C4C]">
         
         {/* Left Side: Health Status Badges */}
         <div className="flex items-center flex-wrap gap-2 sm:gap-3 text-[11px]">
           
           {/* Rover Link Badge */}
-          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded border ${linkBadge.color}`}>
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border font-semibold ${linkBadge.color}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${linkBadge.dot}`} />
-            <span className="font-bold">{linkBadge.label}</span>
+            <span>{linkBadge.label}</span>
           </div>
 
           {/* MQTT State */}
-          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded border ${
-            mqttConnected ? "border-emerald-500/30 text-emerald-400 bg-emerald-950/30" : "border-zinc-700 text-zinc-400 bg-zinc-900"
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border font-medium ${
+            mqttConnected ? "border-emerald-300 text-emerald-800 bg-emerald-50" : "border-stone-300 text-stone-500 bg-stone-100"
           }`}>
             <Radio className="w-3 h-3" />
             <span>MQTT: <strong>{mqttStatus}</strong></span>
           </div>
 
           {/* Firebase State */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-sky-500/30 text-sky-400 bg-sky-950/30">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-sky-300 text-sky-800 bg-sky-50 font-medium">
             <Database className="w-3 h-3" />
             <span>FIRESTORE: <strong>{firebaseStatus}</strong></span>
           </div>
 
           {/* Deadman Watchdog */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-[#252830] text-[#EAE2D5] bg-[#17181D]">
-            <Shield className="w-3 h-3 text-[#D97706]" />
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#D4C9B8] text-[#1A1612] bg-[#F2EDE6] font-medium">
+            <Shield className="w-3 h-3 text-[#C2601F]" />
             <span>DEADMAN: <strong>500ms AUTO-HALT</strong></span>
           </div>
 
         </div>
 
-        {/* Right Side: Packet Latency & Copyright */}
+        {/* Right Side: Packet Latency & Version */}
         <div className="flex items-center gap-3 text-[11px]">
-          <div className="flex items-center gap-1 text-[#EAE2D5]">
-            <Activity className="w-3 h-3 text-cyan-400" />
-            <span>PACKET AGE:</span>
-            <strong className={isStale ? "text-red-400" : "text-emerald-400"}>
+          <div className="flex items-center gap-1.5 text-[#1A1612] bg-[#F2EDE6] px-2.5 py-1 rounded-md border border-[#D4C9B8]">
+            <Activity className="w-3 h-3 text-[#C2601F]" />
+            <span className="text-[#6B5C4C]">PACKET AGE:</span>
+            <strong className={isStale ? "text-red-600" : "text-emerald-700"}>
               {packetAgeMs} ms
             </strong>
           </div>
 
-          <span className="text-[#7E766B] hidden md:inline">·</span>
+          <span className="text-[#D4C9B8] hidden md:inline">·</span>
 
-          <span className="text-[#7E766B] hidden md:inline">
+          <span className="text-[#9E8D7A] hidden md:inline">
             FIRE-X COMMAND CENTER · V2.0
           </span>
         </div>

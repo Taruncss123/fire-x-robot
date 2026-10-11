@@ -14,7 +14,6 @@ import AlertsTimeline from "@/components/AlertsTimeline";
 import FooterStatusStrip from "@/components/FooterStatusStrip";
 
 export default function CommandCenterPage() {
-  // Master State
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [robotConnected, setRobotConnected] = useState(false);
   const [isStale, setIsStale] = useState(false);
@@ -24,97 +23,49 @@ export default function CommandCenterPage() {
   const [mqttStatus, setMqttStatus] = useState("CONNECTED");
   const [firebaseStatus, setFirebaseStatus] = useState("ACTIVE (FIRESTORE)");
   const [lastSavedBatchTime, setLastSavedBatchTime] = useState("");
-  
-  // Telemetry
+
   const [telemetry, setTelemetry] = useState({
     ts: Date.now(),
-    temp: 34.2,
-    temp_ds18b20_1: 34.2,
-    temp_ds18b20_2: 36.8,
-    humidity: 42.0,
-    mq2: 24,
-    mq5: 18,
-    smoke: "LOW",
-    flame: false,
-    thermal_max: 33.5,
-    thermal_dir: "CENTER",
+    temp: 34.2, temp_ds18b20_1: 34.2, temp_ds18b20_2: 36.8,
+    humidity: 42.0, mq2: 24, mq5: 18, smoke: "LOW",
+    flame: false, thermal_max: 33.5, thermal_dir: "CENTER",
     thermal_grid: Array(64).fill(28),
-    battery: 88,
-    mode: "MANUAL",
-    zone: "A",
-    person: false,
-    pump: false,
-    pan: 90,
-    tilt: 45,
-    speed: 0.6,
-    cannon_lock: false,
-    estop: false,
-    movement: "STOP"
+    battery: 88, mode: "MANUAL", zone: "A",
+    person: false, pump: false, pan: 90, tilt: 45,
+    speed: 0.6, cannon_lock: false, estop: false, movement: "STOP"
   });
 
   const [batches, setBatches] = useState([]);
   const [events, setEvents] = useState([]);
   const [tempHistory, setTempHistory] = useState([]);
 
-  // WebSocket Ref
   const wsRef = useRef(null);
   const lastPacketTimeRef = useRef(Date.now());
 
-  // Send Command to Backend WebSocket
   const sendCommand = useCallback((cmd) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(cmd));
     } else {
-      // Local demo fallback handling if backend is offline
-      handleLocalDemoCommand(cmd);
+      if (cmd.type === "move") setTelemetry(p => ({ ...p, movement: cmd.dir || "STOP", speed: cmd.speed || 0.6 }));
+      else if (cmd.type === "pump") { if (cmd.on && telemetry.person) return; setTelemetry(p => ({ ...p, pump: !!cmd.on })); }
+      else if (cmd.type === "aim") setTelemetry(p => ({ ...p, pan: cmd.pan ?? p.pan, tilt: cmd.tilt ?? p.tilt }));
+      else if (cmd.type === "mode") setTelemetry(p => ({ ...p, mode: cmd.value }));
+      else if (cmd.type === "estop") setTelemetry(p => ({ ...p, estop: true, movement: "STOP", pump: false, mode: "EMERGENCY" }));
+      else if (cmd.type === "reset" || cmd.type === "arm") setTelemetry(p => ({ ...p, estop: false, mode: "MANUAL" }));
     }
-  }, []);
+  }, [telemetry.person]);
 
-  // Local demo fallback handler
-  const handleLocalDemoCommand = (cmd) => {
-    if (cmd.type === "move") {
-      setTelemetry(prev => ({ ...prev, movement: cmd.dir || "STOP", speed: cmd.speed || 0.6 }));
-    } else if (cmd.type === "pump") {
-      if (cmd.on && telemetry.person) return;
-      setTelemetry(prev => ({ ...prev, pump: !!cmd.on }));
-    } else if (cmd.type === "aim") {
-      setTelemetry(prev => ({ ...prev, pan: cmd.pan ?? prev.pan, tilt: cmd.tilt ?? prev.tilt }));
-    } else if (cmd.type === "mode") {
-      setTelemetry(prev => ({ ...prev, mode: cmd.value }));
-    } else if (cmd.type === "estop") {
-      setTelemetry(prev => ({ ...prev, estop: true, movement: "STOP", pump: false, mode: "EMERGENCY" }));
-    } else if (cmd.type === "reset" || cmd.type === "arm") {
-      setTelemetry(prev => ({ ...prev, estop: false, mode: "MANUAL" }));
-    }
-  };
-
-  // Helper actions
   const handleEmergencyStop = () => sendCommand({ type: "estop" });
   const handleReleaseEstop = () => sendCommand({ type: "reset" });
   const handleSetMode = (mode) => sendCommand({ type: "mode", value: mode });
   const handleTogglePump = () => sendCommand({ type: "pump", on: !telemetry.pump });
   const handleSetPump = (on) => sendCommand({ type: "pump", on });
   const handleAimCannon = (pan, tilt) => sendCommand({ type: "aim", pan, tilt });
-  
-  const handleToggleDemo = () => {
-    const next = !isDemoMode;
-    setIsDemoMode(next);
-    sendCommand({ type: "set_demo", enabled: next });
-  };
+  const handleToggleDemo = () => { const next = !isDemoMode; setIsDemoMode(next); sendCommand({ type: "set_demo", enabled: next }); };
+  const handleSimulateFire = (enabled = true) => sendCommand({ type: "sim_fire", enabled });
+  const handleResetSim = () => sendCommand({ type: "sim_fire", enabled: false });
+  const handleTogglePerson = (detected) => sendCommand({ type: "set_person", detected });
 
-  const handleSimulateFire = (enabled = true) => {
-    sendCommand({ type: "sim_fire", enabled });
-  };
-
-  const handleResetSim = () => {
-    sendCommand({ type: "sim_fire", enabled: false });
-  };
-
-  const handleTogglePerson = (detected) => {
-    sendCommand({ type: "set_person", detected });
-  };
-
-  // WebSocket Connection
   useEffect(() => {
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:5001";
     let ws = null;
@@ -124,18 +75,11 @@ export default function CommandCenterPage() {
       try {
         ws = new WebSocket(wsUrl);
         wsRef.current = ws;
-
-        ws.onopen = () => {
-          setRobotConnected(true);
-          setIsStale(false);
-          lastPacketTimeRef.current = Date.now();
-        };
-
+        ws.onopen = () => { setRobotConnected(true); setIsStale(false); lastPacketTimeRef.current = Date.now(); };
         ws.onmessage = (event) => {
           try {
             const msg = JSON.parse(event.data);
             lastPacketTimeRef.current = Date.now();
-
             if (msg.type === "state" && msg.data) {
               const d = msg.data;
               if (d.telemetry) setTelemetry(d.telemetry);
@@ -166,34 +110,19 @@ export default function CommandCenterPage() {
             } else if (msg.type === "event" && msg.data) {
               setEvents(prev => [msg.data, ...prev.slice(0, 50)]);
             }
-          } catch (err) {
-            // parse error
-          }
+          } catch (err) { /* parse error */ }
         };
-
-        ws.onclose = () => {
-          setRobotConnected(false);
-          setIsStale(true);
-          reconnectTimeout = setTimeout(connect, 2000);
-        };
-
-        ws.onerror = () => {
-          ws.close();
-        };
-      } catch (err) {
-        reconnectTimeout = setTimeout(connect, 3000);
-      }
+        ws.onclose = () => { setRobotConnected(false); setIsStale(true); reconnectTimeout = setTimeout(connect, 2000); };
+        ws.onerror = () => { ws.close(); };
+      } catch (err) { reconnectTimeout = setTimeout(connect, 3000); }
     };
 
     connect();
 
-    // Stale check interval (every 1s)
     const staleInterval = setInterval(() => {
       const age = Date.now() - lastPacketTimeRef.current;
       setPacketAgeMs(age);
-      if (age > 5000 && !isDemoMode) {
-        setIsStale(true);
-      }
+      if (age > 5000 && !isDemoMode) setIsStale(true);
     }, 500);
 
     return () => {
@@ -204,10 +133,10 @@ export default function CommandCenterPage() {
   }, [isDemoMode]);
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#0D0E11] text-[#F5EFEB] selection:bg-[#D97706] selection:text-black ${isStale && !isDemoMode ? 'opacity-85' : ''}`}>
-      
-      {/* 1. Top Navigation Bar */}
-      <Navbar 
+    <div className="min-h-screen w-full flex flex-col" style={{ background: "var(--bg-page)" }}>
+
+      {/* Navbar */}
+      <Navbar
         telemetry={telemetry}
         isDemoMode={isDemoMode}
         robotConnected={robotConnected}
@@ -217,8 +146,8 @@ export default function CommandCenterPage() {
         onSimulateFire={handleSimulateFire}
       />
 
-      {/* 2. Top Warning & Mode Banners */}
-      <Banners 
+      {/* Banners */}
+      <Banners
         isDemoMode={isDemoMode}
         estop={telemetry.estop}
         personDetected={telemetry.person}
@@ -228,32 +157,24 @@ export default function CommandCenterPage() {
         onTogglePerson={handleTogglePerson}
       />
 
-      {/* Main Single-Page Command Center Grid */}
-      <main className="flex-1 max-w-[1720px] w-full mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4">
-        
-        {/* 3. Autonomous Mission Pipeline Tracker Bar */}
+      {/* Main Content — full viewport width with comfortable padding */}
+      <main className="flex-1 w-full px-4 sm:px-6 xl:px-8 py-5 flex flex-col gap-4">
+
+        {/* Pipeline Tracker */}
         <PipelineTracker currentStage={pipelineStage} />
 
-        {/* 4. HERO SECTION:
-             - LEFT: Live AMG8833 Thermal Infrared (8x8) & Pi Video Stream
-             - CENTER: Rover Teleoperation & Water Cannon Hub (Centre of the page)
-             - RIGHT: Composite Fire Confidence Index (0-100 score + weights)
-        */}
+        {/* Hero Row: Thermal | Controls | Fire Confidence */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-          
-          {/* Thermal & Camera Panel (Columns 1 - 4) */}
           <div className="lg:col-span-4 flex flex-col">
-            <LiveThermalPanel 
+            <LiveThermalPanel
               thermalGrid={telemetry.thermal_grid}
               thermalMax={telemetry.thermal_max}
               thermalDir={telemetry.thermal_dir}
               cameraStreamUrl={process.env.NEXT_PUBLIC_CAMERA_STREAM_URL || ""}
             />
           </div>
-
-          {/* CENTRE: Control Hub (Columns 5 - 8) */}
           <div className="lg:col-span-5 flex flex-col">
-            <ControlSection 
+            <ControlSection
               telemetry={telemetry}
               isDemoMode={isDemoMode}
               onSendCommand={sendCommand}
@@ -266,29 +187,15 @@ export default function CommandCenterPage() {
               personDetected={telemetry.person}
             />
           </div>
-
-          {/* Fire Confidence Panel (Columns 9 - 12) */}
           <div className="lg:col-span-3 flex flex-col">
-            <FireConfidencePanel 
-              telemetry={telemetry}
-              fireConfidence={fireConfidence}
-            />
+            <FireConfidencePanel telemetry={telemetry} fireConfidence={fireConfidence} />
           </div>
-
         </div>
 
-        {/* 5. SENSORY ANALYTICS ROW:
-             - LEFT: Gas Density (MQ-2 and MQ-5 Relative Risk Index 0-100%)
-             - RIGHT: Temperature & Atmospheric (DS18B20 x2, DHT22 temp & humidity + live line graph)
-        */}
+        {/* Sensor Row: Gas | Temperature */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
-          <GasDensityPanel 
-            mq2={telemetry.mq2}
-            mq5={telemetry.mq5}
-            smokeStatus={telemetry.smoke}
-          />
-
-          <TemperaturePanel 
+          <GasDensityPanel mq2={telemetry.mq2} mq5={telemetry.mq5} smokeStatus={telemetry.smoke} />
+          <TemperaturePanel
             temp={telemetry.temp}
             tempChassis={telemetry.temp_ds18b20_1}
             tempElectronics={telemetry.temp_ds18b20_2}
@@ -297,21 +204,15 @@ export default function CommandCenterPage() {
           />
         </div>
 
-        {/* 6. DATA LOG & TIMELINE ROW:
-             - LEFT: 5-Minute Structured Data Log & Trends Chart
-             - RIGHT: Alerts & Mission Event Timeline
-        */}
+        {/* Data Log & Alerts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           <div className="lg:col-span-8 flex flex-col">
-            <DataLogSection 
+            <DataLogSection
               batches={batches}
               lastSavedTime={lastSavedBatchTime}
-              onExportCsv={() => {
-                window.open("http://localhost:5001/api/export/csv", "_blank");
-              }}
+              onExportCsv={() => window.open("http://localhost:5001/api/export/csv", "_blank")}
             />
           </div>
-
           <div className="lg:col-span-4 flex flex-col">
             <AlertsTimeline events={events} />
           </div>
@@ -319,8 +220,8 @@ export default function CommandCenterPage() {
 
       </main>
 
-      {/* 7. Footer & Real-Time Status Strip */}
-      <FooterStatusStrip 
+      {/* Footer */}
+      <FooterStatusStrip
         robotConnected={robotConnected}
         isDemoMode={isDemoMode}
         isStale={isStale}
@@ -328,7 +229,6 @@ export default function CommandCenterPage() {
         mqttStatus={mqttStatus}
         firebaseStatus={firebaseStatus}
       />
-
     </div>
   );
 }

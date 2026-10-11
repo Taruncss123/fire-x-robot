@@ -610,6 +610,34 @@ wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     try {
       const parsed = JSON.parse(message.toString());
+
+      // Direct Robot / ESP32 Telemetry via WebSocket
+      if (parsed.type === 'ESP32_TELEMETRY' || parsed.type === 'telemetry') {
+        const tele = {
+          temp: parsed.temperatureC ?? parsed.temp ?? state.telemetry.temp,
+          mq2: parsed.smokePpm ? Math.min(100, Math.round(parsed.smokePpm / 4)) : (parsed.mq2 ?? state.telemetry.mq2),
+          mq5: parsed.mq5 ?? state.telemetry.mq5,
+          flame: parsed.flameSensors ? (parsed.flameSensors.left || parsed.flameSensors.center || parsed.flameSensors.right) : (parsed.flame ?? state.telemetry.flame),
+          battery: parsed.battery ?? state.telemetry.battery,
+          pump: parsed.pumpActive ?? parsed.pump ?? state.telemetry.pump,
+          estop: parsed.emergencyStop ?? parsed.estop ?? state.telemetry.estop,
+          thermal_max: parsed.thermal_max ?? state.telemetry.thermal_max,
+          thermal_grid: parsed.thermal_grid ?? state.telemetry.thermal_grid
+        };
+        handleIncomingRobotTelemetry(tele);
+        ws.send(JSON.stringify({ type: 'telemetry_ack', received: true }));
+        return;
+      }
+
+      if (parsed.type === 'ESP32_HANDSHAKE') {
+        state.robotConnected = true;
+        state.lastPacketTime = Date.now();
+        state.isDemoMode = false;
+        logEvent('ROBOT HARDWARE CONNECTED', `Hardware ${parsed.robotId || 'ESP32'} handshake established.`, 'safe');
+        ws.send(JSON.stringify({ type: 'handshake_ack', status: 'LINK_ESTABLISHED' }));
+        return;
+      }
+
       const res = handleCommand(parsed);
       ws.send(JSON.stringify({ type: 'command_ack', result: res }));
     } catch (e) {
@@ -639,6 +667,13 @@ app.get('/api/telemetry', (req, res) => {
     packetAgeMs: Date.now() - state.lastPacketTime,
     isStale: (Date.now() - state.lastPacketTime) > 5000
   });
+});
+
+// Ingest telemetry via HTTP POST from ESP32 / Raspberry Pi
+app.post('/api/telemetry', (req, res) => {
+  const data = req.body;
+  handleIncomingRobotTelemetry(data);
+  res.json({ success: true, received: true });
 });
 
 app.post('/api/command', (req, res) => {

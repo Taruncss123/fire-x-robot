@@ -2,24 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { 
-  Wifi, 
-  WifiOff, 
-  ShieldAlert, 
-  Battery, 
-  BatteryCharging, 
-  Clock, 
-  Sparkles, 
-  Volume2, 
-  VolumeX, 
-  Maximize2 
-} from "lucide-react";
+import { Wifi, WifiOff, Battery, Clock, Flame } from "lucide-react";
 
-export default function Navbar({ 
-  telemetry, 
-  isDemoMode, 
-  robotConnected, 
-  isStale, 
+export default function Navbar({
+  telemetry,
+  isDemoMode,
+  robotConnected,
+  isStale,
   onToggleDemo,
   onResetSim,
   onSimulateFire
@@ -27,125 +16,95 @@ export default function Navbar({
   const [timeStr, setTimeStr] = useState("");
 
   useEffect(() => {
-    const updateTime = () => {
-      setTimeStr(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-    };
+    const updateTime = () => setTimeStr(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
     updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+    const id = setInterval(updateTime, 1000);
+    return () => clearInterval(id);
   }, []);
 
-  // Connection badge state
-  let connBadge = {
-    bg: "bg-emerald-950/80 border-emerald-500/40 text-emerald-400",
-    dot: "bg-emerald-400",
-    label: "LIVE ROVER",
-    sub: "FRESH DATA"
-  };
-
+  // Connection badge
+  let connBadge = { bg: "bg-emerald-100 border-emerald-300 text-emerald-800", dot: "bg-emerald-500", label: "LIVE", sub: "FRESH DATA" };
   if (isDemoMode) {
-    connBadge = {
-      bg: "bg-amber-950/80 border-amber-500/40 text-amber-300",
-      dot: "bg-amber-400",
-      label: "DEMO MODE",
-      sub: "SIMULATED DATA"
-    };
+    connBadge = { bg: "bg-amber-100 border-amber-300 text-amber-800", dot: "bg-amber-500", label: "DEMO", sub: "SIMULATED" };
   } else if (!robotConnected || isStale) {
-    connBadge = {
-      bg: "bg-zinc-900 border-zinc-700 text-zinc-400",
-      dot: "bg-zinc-500",
-      label: "NOT CONNECTED",
-      sub: isStale ? "STALE (>5s)" : "OFFLINE"
-    };
+    connBadge = { bg: "bg-stone-200 border-stone-300 text-stone-500", dot: "bg-stone-400", label: "OFFLINE", sub: isStale ? "STALE >5s" : "DISCONNECTED" };
   }
 
-  // Mode badge state
+  // Mode badge
   const mode = telemetry?.mode || "MANUAL";
-  let modeBadgeColor = "border-zinc-700 text-zinc-300 bg-zinc-900";
-  if (mode === "EMERGENCY") {
-    modeBadgeColor = "border-red-500/80 text-red-300 bg-red-950/80 alarm-glow";
-  } else if (mode === "AUTO FIRE") {
-    modeBadgeColor = "border-amber-500/80 text-amber-300 bg-amber-950/80";
-  } else if (mode === "ASSISTED") {
-    modeBadgeColor = "border-sky-500/80 text-sky-300 bg-sky-950/80";
-  } else {
-    modeBadgeColor = "border-[#D97706]/60 text-[#F5EFEB] bg-[#1E2026]";
-  }
+  let modeBadge = "bg-stone-100 border-stone-300 text-stone-600";
+  if (mode === "EMERGENCY") modeBadge = "bg-red-100 border-red-400 text-red-700 alarm-glow";
+  else if (mode === "AUTO FIRE") modeBadge = "bg-orange-100 border-orange-400 text-orange-700";
+  else if (mode === "ASSISTED") modeBadge = "bg-sky-100 border-sky-400 text-sky-700";
+  else modeBadge = "bg-amber-50 border-amber-300 text-amber-800";
 
   const battery = telemetry?.battery ?? 88;
+  const battColor = battery > 50 ? "text-emerald-700" : battery > 25 ? "text-amber-700" : "text-red-600";
 
   return (
-    <header className="sticky top-0 z-50 bg-[#121316]/95 backdrop-blur-md border-b border-[#252830] px-3 sm:px-6 py-2.5 transition-all">
-      <div className="max-w-[1720px] mx-auto flex flex-wrap items-center justify-between gap-3">
-        
-        {/* Brand & Logo */}
+    <header className="sticky top-0 z-50 w-full border-b border-[#D4C9B8] backdrop-blur-sm"
+      style={{ background: "rgba(248,244,239,0.95)" }}>
+      <div className="w-full px-4 sm:px-6 xl:px-8 mx-auto flex flex-wrap items-center justify-between gap-3 py-3">
+
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-[#EAE2D5]/30 shadow-md shadow-black/40 bg-black flex-shrink-0">
-            <Image 
-              src="/logo.jpg" 
-              alt="Myth Annihilator FIRE-X Logo" 
-              fill
-              className="object-cover"
-              priority
-            />
+          <div className="w-[38px] h-[38px] min-w-[38px] min-h-[38px] rounded-full overflow-hidden border-2 border-[#C2601F]/40 shadow-sm bg-[#1A1612] flex-shrink-0 flex items-center justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.jpg" alt="FIRE-X Logo" className="w-full h-full object-cover" width="38" height="38" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-bold text-base sm:text-lg tracking-wider text-[#F5EFEB] font-mono">
-                FIRE-X
-              </h1>
-              <span className="text-[10px] tracking-widest font-semibold px-1.5 py-0.5 rounded bg-[#D97706] text-black">
-                COMMAND CENTER
-              </span>
+              <h1 className="font-mono font-bold text-base tracking-wider text-[#1A1612]">FIRE-X</h1>
+              <span className="text-[10px] tracking-widest font-bold px-2 py-0.5 rounded-full text-white"
+                style={{ background: "var(--primary)" }}>COMMAND CENTER</span>
             </div>
-            <p className="text-[11px] text-[#A6987E] tracking-tight hidden sm:block">
-              MYTH ANNIHILATOR · STRATEGIC RISK &amp; FIRE MITIGATION
+            <p className="text-[10px] text-[#9E8D7A] tracking-tight hidden sm:block font-mono">
+              MYTH ANNIHILATOR · STRATEGIC RISK & FIRE MITIGATION
             </p>
           </div>
         </div>
 
-        {/* Badges & Telemetry Quick Readouts */}
-        <div className="flex items-center flex-wrap gap-2 sm:gap-3 text-xs">
-          
-          {/* Honest Connection Badge */}
-          <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full border text-[11px] font-mono font-medium ${connBadge.bg}`}>
-            <span className={`w-2 h-2 rounded-full ${connBadge.dot} animate-pulse`} />
-            <span className="font-semibold">{connBadge.label}</span>
-            <span className="opacity-75 hidden md:inline">({connBadge.sub})</span>
+        {/* Right: Status Badges */}
+        <div className="flex items-center flex-wrap gap-2 text-xs font-mono">
+
+          {/* Connection */}
+          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold ${connBadge.bg}`}>
+            <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${connBadge.dot}`} />
+            <span>{connBadge.label}</span>
+            <span className="opacity-60 hidden md:inline">({connBadge.sub})</span>
           </div>
 
-          {/* Rover Mode Badge */}
-          <div className={`px-2.5 py-1 rounded-md border text-[11px] font-mono font-bold uppercase tracking-wide ${modeBadgeColor}`}>
-            MODE: {mode}
+          {/* Mode */}
+          <div className={`px-2.5 py-1 rounded-md border text-[11px] font-bold uppercase tracking-wide ${modeBadge}`}>
+            {mode}
           </div>
 
-          {/* Battery Status */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#17181D] border border-[#252830] text-[#EAE2D5] font-mono text-[11px]">
-            <Battery className={`w-3.5 h-3.5 ${battery > 40 ? 'text-emerald-400' : battery > 20 ? 'text-amber-400' : 'text-red-400'}`} />
-            <span className="font-semibold">{Math.round(battery)}%</span>
+          {/* Battery */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#D4C9B8] bg-[#F2EDE6] text-[11px]">
+            <Battery className={`w-3.5 h-3.5 ${battColor}`} />
+            <span className={`font-bold ${battColor}`}>{Math.round(battery)}%</span>
           </div>
 
           {/* Clock */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#17181D] border border-[#252830] text-[#EAE2D5] font-mono text-[11px] hidden sm:flex">
-            <Clock className="w-3.5 h-3.5 text-[#D97706]" />
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#D4C9B8] bg-[#F2EDE6] text-[11px] text-[#6B5C4C] hidden sm:flex">
+            <Clock className="w-3 h-3 text-[#C2601F]" />
             <span>{timeStr || "00:00:00"}</span>
           </div>
 
-          {/* Quick Demo Toggle Switch */}
+          {/* Demo Toggle */}
           <button
             onClick={onToggleDemo}
-            className={`px-2.5 py-1 rounded text-[11px] font-mono font-semibold transition-all border ${
-              isDemoMode 
-                ? 'bg-[#D97706] text-black border-[#F5EFEB]/30 hover:bg-[#B45309]' 
-                : 'bg-zinc-800 text-zinc-300 border-zinc-700 hover:bg-zinc-700'
+            className={`px-3 py-1 rounded-full text-[11px] font-bold tracking-wide border transition-all ${
+              isDemoMode
+                ? "text-white border-[#A34E18]"
+                : "bg-stone-100 text-stone-500 border-stone-300 hover:bg-stone-200"
             }`}
-            title="Toggle between Live Hardware and Demo Simulator"
+            style={isDemoMode ? { background: "var(--primary)" } : {}}
+            title="Toggle Demo / Live mode"
           >
-            {isDemoMode ? "SIMULATOR: ON" : "SIMULATOR: OFF"}
+            {isDemoMode ? "SIM ON" : "SIM OFF"}
           </button>
 
         </div>
-
       </div>
     </header>
   );

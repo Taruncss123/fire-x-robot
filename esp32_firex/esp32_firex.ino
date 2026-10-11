@@ -35,12 +35,14 @@
 // =====================================================================================
 // 1. WI-FI & SERVER CONFIGURATION
 // =====================================================================================
+// Replace with your Wi-Fi details (your router or phone mobile hotspot):
 const char* WIFI_SSID     = "YOUR_WIFI_SSID";
 const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 
-const char* BACKEND_HOST  = "192.168.1.100"; // IP address of computer running FastAPI server.py
-const int   BACKEND_PORT  = 8000;
-const char* WS_PATH       = "/ws";
+// Replace with your computer's local IP address (find it by running `ipconfig` in cmd):
+const char* BACKEND_HOST  = "192.168.1.100"; 
+const int   BACKEND_PORT  = 5001; // Port 5001 (Node.js FIRE-X Command Center Bridge)
+const char* WS_PATH       = "/";    // Root WebSocket path
 
 WebSocketsClient webSocket;
 
@@ -309,34 +311,50 @@ void onWebSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       DeserializationError error = deserializeJson(doc, payload);
       if (error) return;
 
-      const char* cmd = doc["cmd"];
+      const char* cmd = doc["cmd"] | doc["type"];
       if (!cmd) return;
 
-      if (strcmp(cmd, "MOVE") == 0) {
-        const char* dir = doc["dir"];
-        int pwm = doc["pwm"] | 160;
-        executeMovement(String(dir), pwm);
+      String c = String(cmd);
+      c.toUpperCase();
+
+      if (c == "MOVE") {
+        String dir = String((const char*)(doc["dir"] | "STOP"));
+        dir.toUpperCase();
+        int pwm = 160;
+        if (doc.containsKey("speed")) {
+          float spd = doc["speed"];
+          pwm = constrain((int)(spd * 255.0), 80, 255);
+        } else if (doc.containsKey("pwm")) {
+          pwm = doc["pwm"];
+        }
+
+        if (dir == "FORWARD" || dir == "FWD") executeMovement("FWD", pwm);
+        else if (dir == "BACKWARD" || dir == "REV") executeMovement("REV", pwm);
+        else if (dir == "LEFT" || dir == "ARC_LEFT") executeMovement("LEFT", pwm);
+        else if (dir == "RIGHT" || dir == "ARC_RIGHT") executeMovement("RIGHT", pwm);
+        else executeMovement("STOP");
       }
-      else if (strcmp(cmd, "STOP") == 0) {
+      else if (c == "STOP") {
         executeMovement("STOP");
       }
-      else if (strcmp(cmd, "PUMP") == 0) {
-        bool state = doc["state"];
+      else if (c == "PUMP") {
+        bool state = doc["on"] | doc["state"];
         waterPumpActive = state && !emergencyStopActive;
         digitalWrite(PUMP_RELAY_PIN, waterPumpActive ? HIGH : LOW);
       }
-      else if (strcmp(cmd, "ESTOP") == 0) {
+      else if (c == "AIM" || c == "SERVO") {
+        int angle = doc["pan"] | doc["angle"] | 90;
+        nozzleAngle = constrain(angle, 0, 180);
+        nozzleServo.write(nozzleAngle);
+      }
+      else if (c == "ESTOP") {
         emergencyStopActive = true;
         executeMovement("STOP");
         waterPumpActive = false;
         digitalWrite(PUMP_RELAY_PIN, LOW);
       }
-      else if (strcmp(cmd, "RELEASE_ESTOP") == 0) {
+      else if (c == "RELEASE_ESTOP" || c == "RESET" || c == "ARM") {
         emergencyStopActive = false;
-      }
-      else if (strcmp(cmd, "SERVO") == 0) {
-        nozzleAngle = constrain(doc["angle"] | 90, 0, 180);
-        nozzleServo.write(nozzleAngle);
       }
       break;
     }

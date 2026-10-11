@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Thermometer, Droplets, Activity, Gauge } from "lucide-react";
+import { Thermometer, Droplets, Activity } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function TemperaturePanel({ 
@@ -16,17 +16,17 @@ export default function TemperaturePanel({
 
   let tempBadge = {
     label: "NORMAL TEMPERATURE",
-    color: "text-emerald-400 bg-emerald-950/60 border-emerald-500/30"
+    color: "text-emerald-800 bg-emerald-50 border-emerald-300"
   };
   if (isHighTemp) {
     tempBadge = {
       label: "OVERHEAT / THERMAL THREAT",
-      color: "text-red-400 bg-red-950/80 border-red-500/60 alarm-glow"
+      color: "text-red-800 bg-red-50 border-red-400 alarm-glow"
     };
   } else if (isWarmTemp) {
     tempBadge = {
       label: "ELEVATED TEMPERATURE",
-      color: "text-amber-400 bg-amber-950/70 border-amber-500/40"
+      color: "text-amber-800 bg-amber-50 border-amber-300"
     };
   }
 
@@ -38,16 +38,16 @@ export default function TemperaturePanel({
   ];
 
   return (
-    <div className="card-panel p-4 flex flex-col justify-between">
+    <div className="card-panel p-4 flex flex-col justify-between border-[#D4C9B8]">
       <div>
-        <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-[#252830]">
+        <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-[#D4C9B8]">
           <div className="flex items-center gap-2">
-            <Thermometer className="w-4 h-4 text-[#D97706]" />
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F5EFEB]">
+            <Thermometer className="w-4 h-4 text-[#C2601F]" />
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#1A1612]">
               Thermal &amp; Atmospheric Sensor Array
             </h3>
           </div>
-          <span className={`text-[10px] font-mono px-2 py-0.5 rounded border font-semibold ${tempBadge.color}`}>
+          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold ${tempBadge.color}`}>
             {tempBadge.label}
           </span>
         </div>
@@ -55,68 +55,68 @@ export default function TemperaturePanel({
         {/* 4 Sensor Metric Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
           
-          <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2.5">
-            <div className="text-[10px] font-mono text-[#A6987E] flex items-center justify-between">
+          <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-2.5">
+            <div className="text-[10px] font-mono text-[#6B5C4C] flex items-center justify-between">
               <span>DS18B20 #1</span>
-              <span className="text-emerald-400">CHASSIS</span>
+              <span className="text-emerald-700 font-bold">CHASSIS</span>
             </div>
-            <div className="font-mono text-xl font-bold text-[#F5EFEB] mt-1">
-              {tempChassis.toFixed(1)}<span className="text-xs text-[#A6987E] font-normal">°C</span>
+            <div className="font-mono text-xl font-bold text-[#1A1612] mt-1">
+              {tempChassis.toFixed(1)}<span className="text-xs text-[#9E8D7A] font-normal">°C</span>
             </div>
-            <div className="text-[9px] text-[#7E766B] font-mono">Chassis Contact</div>
+            <div className="text-[9px] text-[#9E8D7A] font-mono">Chassis Contact</div>
           </div>
 
-          <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2.5">
-            <div className="text-[10px] font-mono text-[#A6987E] flex items-center justify-between">
+          <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-2.5">
+            <div className="text-[10px] font-mono text-[#6B5C4C] flex items-center justify-between">
               <span>DS18B20 #2</span>
-              <span className="text-sky-400">CABIN</span>
+              <span className="text-sky-700 font-bold">CABIN</span>
             </div>
-            <div className="font-mono text-xl font-bold text-[#F5EFEB] mt-1">
-              {tempElectronics.toFixed(1)}<span className="text-xs text-[#A6987E] font-normal">°C</span>
+            <div className="font-mono text-xl font-bold text-[#1A1612] mt-1">
+              {tempElectronics.toFixed(1)}<span className="text-xs text-[#9E8D7A] font-normal">°C</span>
             </div>
-            <div className="text-[9px] text-[#7E766B] font-mono">Electronics Bay</div>
+            <div className="text-[9px] text-[#9E8D7A] font-mono">Electronics Bay</div>
           </div>
 
-          <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2.5">
-            <div className="text-[10px] font-mono text-[#A6987E] flex items-center justify-between">
+          <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-2.5">
+            <div className="text-[10px] font-mono text-[#6B5C4C] flex items-center justify-between">
               <span>DHT22 TEMP</span>
-              <span className="text-amber-400">AIR</span>
+              <span className="text-amber-700 font-bold">AIR</span>
             </div>
-            <div className="font-mono text-xl font-bold text-[#F5EFEB] mt-1">
-              {temp.toFixed(1)}<span className="text-xs text-[#A6987E] font-normal">°C</span>
+            <div className="font-mono text-xl font-bold text-[#1A1612] mt-1">
+              {temp.toFixed(1)}<span className="text-xs text-[#9E8D7A] font-normal">°C</span>
             </div>
-            <div className="text-[9px] text-[#7E766B] font-mono">Ambient Ambient</div>
+            <div className="text-[9px] text-[#9E8D7A] font-mono">Ambient Air</div>
           </div>
 
-          <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2.5">
-            <div className="text-[10px] font-mono text-[#A6987E] flex items-center justify-between">
+          <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-2.5">
+            <div className="text-[10px] font-mono text-[#6B5C4C] flex items-center justify-between">
               <span>DHT22 RH</span>
-              <Droplets className="w-3 h-3 text-cyan-400" />
+              <Droplets className="w-3 h-3 text-cyan-600" />
             </div>
-            <div className="font-mono text-xl font-bold text-cyan-300 mt-1">
-              {humidity.toFixed(1)}<span className="text-xs text-[#A6987E] font-normal">%</span>
+            <div className="font-mono text-xl font-bold text-cyan-800 mt-1">
+              {humidity.toFixed(1)}<span className="text-xs text-[#9E8D7A] font-normal">%</span>
             </div>
-            <div className="text-[9px] text-[#7E766B] font-mono">Relative Humidity</div>
+            <div className="text-[9px] text-[#9E8D7A] font-mono">Relative Humidity</div>
           </div>
 
         </div>
 
         {/* Live Recharts Line Chart */}
-        <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2.5">
+        <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-3">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#A6987E]">
-              <Activity className="w-3.5 h-3.5 text-[#D97706]" />
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#6B5C4C]">
+              <Activity className="w-3.5 h-3.5 text-[#C2601F]" />
               <span>LIVE TEMPERATURE TREND (RECENT MINUTES)</span>
             </div>
             <div className="flex items-center gap-3 text-[10px] font-mono">
-              <span className="flex items-center gap-1 text-amber-400">
-                <span className="w-2 h-0.5 bg-amber-400 rounded-full" /> Ambient
+              <span className="flex items-center gap-1 text-[#C2601F]">
+                <span className="w-2 h-0.5 bg-[#C2601F] rounded-full" /> Ambient
               </span>
-              <span className="flex items-center gap-1 text-emerald-400">
-                <span className="w-2 h-0.5 bg-emerald-400 rounded-full" /> Chassis
+              <span className="flex items-center gap-1 text-emerald-700">
+                <span className="w-2 h-0.5 bg-emerald-700 rounded-full" /> Chassis
               </span>
-              <span className="flex items-center gap-1 text-sky-400">
-                <span className="w-2 h-0.5 bg-sky-400 rounded-full" /> Electronics
+              <span className="flex items-center gap-1 text-sky-700">
+                <span className="w-2 h-0.5 bg-sky-700 rounded-full" /> Electronics
               </span>
             </div>
           </div>
@@ -126,30 +126,31 @@ export default function TemperaturePanel({
               <LineChart data={chartData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
                 <XAxis 
                   dataKey="time" 
-                  stroke="#7E766B" 
+                  stroke="#9E8D7A" 
                   fontSize={9} 
                   tickLine={false} 
                   interval="preserveStartEnd" 
                 />
                 <YAxis 
-                  stroke="#7E766B" 
+                  stroke="#9E8D7A" 
                   fontSize={9} 
                   domain={['dataMin - 2', 'dataMax + 4']} 
                   tickLine={false} 
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#121316', 
-                    borderColor: '#252830', 
-                    borderRadius: '0.375rem',
+                    backgroundColor: '#FAF7F4', 
+                    borderColor: '#D4C9B8', 
+                    borderRadius: '0.5rem',
                     fontSize: '11px',
-                    fontFamily: 'ui-monospace, monospace'
+                    fontFamily: 'ui-monospace, monospace',
+                    color: '#1A1612'
                   }} 
                 />
                 <Line 
                   type="monotone" 
                   dataKey="temp" 
-                  stroke="#F59E0B" 
+                  stroke="#C2601F" 
                   strokeWidth={2} 
                   dot={false} 
                   isAnimationActive={false} 
@@ -157,7 +158,7 @@ export default function TemperaturePanel({
                 <Line 
                   type="monotone" 
                   dataKey="chassis" 
-                  stroke="#10B981" 
+                  stroke="#16A34A" 
                   strokeWidth={1.5} 
                   dot={false} 
                   isAnimationActive={false} 
@@ -165,7 +166,7 @@ export default function TemperaturePanel({
                 <Line 
                   type="monotone" 
                   dataKey="electronics" 
-                  stroke="#0EA5E9" 
+                  stroke="#0284C7" 
                   strokeWidth={1.5} 
                   dot={false} 
                   isAnimationActive={false} 
@@ -176,7 +177,7 @@ export default function TemperaturePanel({
         </div>
       </div>
 
-      <div className="text-[10px] text-[#7E766B] font-mono pt-2 border-t border-[#252830] flex justify-between items-center">
+      <div className="text-[10px] text-[#9E8D7A] font-mono pt-2 mt-2 border-t border-[#D4C9B8] flex justify-between items-center">
         <span>Sensors: DS18B20 1-Wire (GPIO 4) · DHT22 (GPIO 5)</span>
         <span>Sampling: 10 Hz Real-Time</span>
       </div>

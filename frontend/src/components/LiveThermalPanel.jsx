@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
-import { Eye, Flame, Crosshair, Camera, Video, Compass, Radio } from "lucide-react";
+import { Flame, Video } from "lucide-react";
 
 export default function LiveThermalPanel({ 
   thermalGrid = [], 
@@ -12,38 +12,6 @@ export default function LiveThermalPanel({
   const canvasRef = useRef(null);
   const [activeView, setActiveView] = useState("thermal"); // "thermal" or "optical"
   const [streamError, setStreamError] = useState(false);
-
-  // Iron / Inferno color map function (cold dark purple -> bright red -> amber -> white-hot)
-  const getIronColor = (t, minT, maxT) => {
-    const norm = Math.max(0, Math.min(1, (t - minT) / (maxT - minT || 1)));
-    
-    let r, g, b;
-    if (norm < 0.25) {
-      // 0.0 - 0.25: Black to Deep Purple
-      r = Math.round(norm * 4 * 80);
-      g = Math.round(norm * 4 * 20);
-      b = Math.round(norm * 4 * 140);
-    } else if (norm < 0.5) {
-      // 0.25 - 0.5: Deep Purple to Red
-      const n = (norm - 0.25) * 4;
-      r = Math.round(80 + n * (220 - 80));
-      g = Math.round(20 + n * (30 - 20));
-      b = Math.round(140 - n * 120);
-    } else if (norm < 0.75) {
-      // 0.5 - 0.75: Red to Amber/Yellow
-      const n = (norm - 0.5) * 4;
-      r = Math.round(220 + n * 35);
-      g = Math.round(30 + n * 190);
-      b = Math.round(20 - n * 20);
-    } else {
-      // 0.75 - 1.0: Yellow to White Hot
-      const n = (norm - 0.75) * 4;
-      r = 255;
-      g = Math.round(220 + n * 35);
-      b = Math.round(n * 240);
-    }
-    return `rgb(${r}, ${g}, ${b})`;
-  };
 
   // Render 8x8 AMG8833 grid with smooth bi-linear interpolation
   useEffect(() => {
@@ -75,7 +43,7 @@ export default function LiveThermalPanel({
       if (grid[i] < minT) minT = grid[i];
     }
 
-    // Render smooth interpolated thermal heatmap onto canvas
+    // Render smooth interpolated thermal heatmap onto offscreen canvas
     const offscreen = document.createElement("canvas");
     offscreen.width = 8;
     offscreen.height = 8;
@@ -121,7 +89,7 @@ export default function LiveThermalPanel({
     ctx.drawImage(offscreen, 0, 0, width, height);
 
     // Subtle 8x8 cell grid overlay
-    ctx.strokeStyle = "rgba(0,0,0,0.15)";
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
     ctx.lineWidth = 1;
     for (let x = 0; x <= width; x += width / 8) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
@@ -149,7 +117,7 @@ export default function LiveThermalPanel({
     ctx.stroke();
 
     // Hotspot temperature tag
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = "rgba(26,22,18,0.85)";
     ctx.fillRect(hotX + 16, hotY - 22, 54, 18);
     ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 1;
@@ -162,35 +130,35 @@ export default function LiveThermalPanel({
   }, [thermalGrid, thermalMax]);
 
   return (
-    <div className="card-panel p-4 flex flex-col justify-between">
+    <div className="card-panel p-4 flex flex-col justify-between border-[#D4C9B8]">
       <div>
         {/* Header */}
-        <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-[#252830]">
+        <div className="flex items-center justify-between pb-2.5 mb-3 border-b border-[#D4C9B8]">
           <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-[#D97706]" />
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F5EFEB]">
+            <Flame className="w-4 h-4 text-[#C2601F]" />
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#1A1612]">
               AMG8833 Thermal IR (8×8 Grid) &amp; Pi Stream
             </h3>
           </div>
           
           {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 bg-[#17181D] p-0.5 rounded border border-[#252830] text-[10px] font-mono">
+          <div className="flex items-center gap-1 bg-[#F2EDE6] p-0.5 rounded-lg border border-[#D4C9B8] text-[10px] font-mono">
             <button
               onClick={() => setActiveView("thermal")}
-              className={`px-2 py-0.5 rounded transition-all ${
+              className={`px-2.5 py-1 rounded-md transition-all font-semibold ${
                 activeView === "thermal" 
-                  ? "bg-[#D97706] text-black font-bold" 
-                  : "text-[#A6987E] hover:text-[#F5EFEB]"
+                  ? "bg-[#C2601F] text-white shadow-sm" 
+                  : "text-[#6B5C4C] hover:text-[#1A1612]"
               }`}
             >
               THERMAL IR
             </button>
             <button
               onClick={() => setActiveView("optical")}
-              className={`px-2 py-0.5 rounded transition-all ${
+              className={`px-2.5 py-1 rounded-md transition-all font-semibold ${
                 activeView === "optical" 
-                  ? "bg-[#D97706] text-black font-bold" 
-                  : "text-[#A6987E] hover:text-[#F5EFEB]"
+                  ? "bg-[#C2601F] text-white shadow-sm" 
+                  : "text-[#6B5C4C] hover:text-[#1A1612]"
               }`}
             >
               PI CAMERA
@@ -200,18 +168,18 @@ export default function LiveThermalPanel({
 
         {/* Hotspot & Direction Quick Readout Badges */}
         <div className="grid grid-cols-2 gap-2 mb-3">
-          <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2 flex items-center justify-between">
-            <div className="text-[10px] font-mono text-[#A6987E]">PEAK THERMAL:</div>
-            <div className="font-mono text-base font-bold text-[#F5EFEB]">
-              {thermalMax.toFixed(1)}<span className="text-xs text-[#A6987E]">°C</span>
+          <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-2.5 flex items-center justify-between">
+            <div className="text-[10px] font-mono text-[#9E8D7A]">PEAK THERMAL:</div>
+            <div className="font-mono text-base font-bold text-[#1A1612]">
+              {thermalMax.toFixed(1)}<span className="text-xs text-[#9E8D7A]">°C</span>
             </div>
           </div>
-          <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2 flex items-center justify-between">
-            <div className="text-[10px] font-mono text-[#A6987E]">HOTSPOT AZIMUTH:</div>
+          <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-2.5 flex items-center justify-between">
+            <div className="text-[10px] font-mono text-[#9E8D7A]">HOTSPOT AZIMUTH:</div>
             <div className={`font-mono text-xs font-bold px-2 py-0.5 rounded border ${
-              thermalDir === "CENTER" ? "bg-amber-950/70 border-amber-600 text-amber-300" :
-              thermalDir === "RIGHT" ? "bg-red-950/70 border-red-600 text-red-300" :
-              "bg-sky-950/70 border-sky-600 text-sky-300"
+              thermalDir === "CENTER" ? "bg-amber-100 border-amber-400 text-amber-800" :
+              thermalDir === "RIGHT" ? "bg-red-100 border-red-400 text-red-800" :
+              "bg-sky-100 border-sky-400 text-sky-800"
             }`}>
               {thermalDir}
             </div>
@@ -219,7 +187,7 @@ export default function LiveThermalPanel({
         </div>
 
         {/* Viewport Frame */}
-        <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-[#252830] bg-black flex items-center justify-center shadow-inner">
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#D4C9B8] bg-[#1A1612] flex items-center justify-center shadow-inner">
           
           {activeView === "thermal" ? (
             <>
@@ -230,20 +198,20 @@ export default function LiveThermalPanel({
                 className="w-full h-full object-cover"
               />
               {/* Tactical HUD Overlay */}
-              <div className="absolute inset-0 pointer-events-none p-2 flex flex-col justify-between text-[10px] font-mono text-white/80">
-                <div className="flex justify-between items-center bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10">
+              <div className="absolute inset-0 pointer-events-none p-2 flex flex-col justify-between text-[10px] font-mono text-white/90">
+                <div className="flex justify-between items-center bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10">
                   <span>AMG8833 (I2C 0x69) · 8×8 BILINEAR</span>
-                  <span className="text-[#D97706] font-bold">PALETTE: INFERNO/IRON</span>
+                  <span className="text-amber-300 font-bold">PALETTE: INFERNO/IRON</span>
                 </div>
-                <div className="flex justify-between items-center bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10">
+                <div className="flex justify-between items-center bg-black/45 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10">
                   <span>HOTSPOT: {thermalDir}</span>
-                  <span className="text-emerald-400">TARGET ACQUIRED</span>
+                  <span className="text-emerald-300 font-bold">TARGET ACQUIRED</span>
                 </div>
               </div>
             </>
           ) : (
             /* Raspberry Pi Camera Stream Slot */
-            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[#090A0C]">
+            <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[#EDE8E0]">
               {cameraStreamUrl && !streamError ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img 
@@ -253,15 +221,15 @@ export default function LiveThermalPanel({
                   onError={() => setStreamError(true)}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center text-[#7E766B]">
-                  <Video className="w-10 h-10 mb-2 opacity-40 text-[#D97706]" />
-                  <div className="font-mono text-xs font-bold text-[#F5EFEB] mb-1">
+                <div className="flex flex-col items-center justify-center text-[#6B5C4C]">
+                  <Video className="w-10 h-10 mb-2 opacity-50 text-[#C2601F]" />
+                  <div className="font-mono text-xs font-bold text-[#1A1612] mb-1">
                     RASPBERRY PI VIDEO STREAM (MJPEG / WebRTC)
                   </div>
-                  <p className="text-[11px] text-[#A6987E] max-w-xs mb-2">
+                  <p className="text-[11px] text-[#9E8D7A] max-w-xs mb-2">
                     {cameraStreamUrl ? "Connecting to video stream endpoint..." : "No stream URL configured in .env (CAMERA_STREAM_URL). Stream placeholder active."}
                   </p>
-                  <div className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                  <div className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#E5DFD6] text-[#6B5C4C] border border-[#D4C9B8]">
                     OPTICAL TARGETING READY
                   </div>
                 </div>
@@ -273,9 +241,9 @@ export default function LiveThermalPanel({
       </div>
 
       {/* Footer scale info */}
-      <div className="flex items-center justify-between text-[10px] font-mono text-[#7E766B] pt-2 border-t border-[#252830]">
+      <div className="flex items-center justify-between text-[10px] font-mono text-[#9E8D7A] pt-2 mt-2 border-t border-[#D4C9B8]">
         <span>Grid: 64 Elements (10 Hz)</span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <span>Cold (25°C)</span>
           <div className="w-16 h-2 rounded-full bg-gradient-to-r from-indigo-800 via-red-600 to-yellow-200" />
           <span>Hot (85°C)</span>

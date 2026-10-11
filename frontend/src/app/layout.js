@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className="min-h-screen bg-[#0D0E11] text-[#F5EFEB] antialiased">
+      <body className="min-h-screen bg-[#EDE8E0] text-[#1A1612] antialiased" style={{ backgroundColor: "#EDE8E0", color: "#1A1612" }}>
         {children}
       </body>
     </html>

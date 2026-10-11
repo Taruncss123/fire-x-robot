@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Download, Database, Calendar, Filter, Clock, TrendingUp } from "lucide-react";
+import { Download, Database, Filter, Clock, TrendingUp } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
 export default function DataLogSection({ 
@@ -81,37 +81,37 @@ export default function DataLogSection({
   };
 
   return (
-    <div className="card-panel p-4 flex flex-col justify-between">
+    <div className="card-panel p-4 flex flex-col justify-between border-[#D4C9B8]">
       <div>
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-2.5 mb-3 border-b border-[#252830]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-2.5 mb-3 border-b border-[#D4C9B8]">
           <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-[#D97706]" />
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F5EFEB]">
+            <Database className="w-4 h-4 text-[#C2601F]" />
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[#1A1612]">
               5-Minute Structured Telemetry Log &amp; Trends
             </h3>
           </div>
 
           <div className="flex items-center flex-wrap gap-2 text-xs font-mono">
             {/* Interval selector */}
-            <div className="flex items-center gap-1.5 bg-[#17181D] px-2 py-1 rounded border border-[#252830]">
-              <span className="text-[#A6987E] text-[10px]">INTERVAL:</span>
+            <div className="flex items-center gap-1.5 bg-[#F2EDE6] px-2.5 py-1 rounded-lg border border-[#D4C9B8]">
+              <span className="text-[#6B5C4C] text-[10px]">INTERVAL:</span>
               <select
                 value={intervalMin}
                 onChange={(e) => setIntervalMin(Number(e.target.value))}
-                className="bg-transparent text-[#F5EFEB] text-xs font-bold outline-none cursor-pointer"
+                className="bg-transparent text-[#1A1612] text-xs font-bold outline-none cursor-pointer"
               >
-                <option value={1} className="bg-[#121316]">1 min</option>
-                <option value={2} className="bg-[#121316]">2 min</option>
-                <option value={5} className="bg-[#121316]">5 min (Default)</option>
-                <option value={10} className="bg-[#121316]">10 min</option>
+                <option value={1} className="bg-[#FAF7F4]">1 min</option>
+                <option value={2} className="bg-[#FAF7F4]">2 min</option>
+                <option value={5} className="bg-[#FAF7F4]">5 min (Default)</option>
+                <option value={10} className="bg-[#FAF7F4]">10 min</option>
               </select>
             </div>
 
             {/* Export CSV Button */}
             <button
               onClick={handleDownloadCsv}
-              className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#D97706] hover:bg-[#B45309] text-black font-bold font-mono text-xs transition-all shadow-md"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C2601F] hover:bg-[#A34E18] text-white font-bold font-mono text-xs transition-all shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
               <span>EXPORT CSV</span>
@@ -121,9 +121,9 @@ export default function DataLogSection({
 
         {/* Status Line & Filter */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs font-mono">
-          <div className="flex items-center gap-2 text-[#A6987E]">
-            <Clock className="w-3.5 h-3.5 text-emerald-400" />
-            <span>LAST SAVED TO FIRESTORE / STORAGE: <strong className="text-[#F5EFEB]">{lastSavedTime || "Awaiting initial batch"}</strong></span>
+          <div className="flex items-center gap-2 text-[#6B5C4C]">
+            <Clock className="w-3.5 h-3.5 text-emerald-700" />
+            <span>LAST SAVED TO FIRESTORE / STORAGE: <strong className="text-[#1A1612]">{lastSavedTime || "Awaiting initial batch"}</strong></span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -133,44 +133,45 @@ export default function DataLogSection({
                 placeholder="Filter time / zone / mode..."
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
-                className="bg-[#17181D] border border-[#252830] text-[#F5EFEB] text-xs px-2.5 py-1 rounded pl-7 outline-none focus:border-[#D97706] w-48 sm:w-56"
+                className="bg-[#F2EDE6] border border-[#D4C9B8] text-[#1A1612] placeholder-[#9E8D7A] text-xs px-2.5 py-1.5 rounded-lg pl-7 outline-none focus:border-[#C2601F] w-48 sm:w-56"
               />
-              <Filter className="w-3.5 h-3.5 text-[#7E766B] absolute left-2 top-1.5" />
+              <Filter className="w-3.5 h-3.5 text-[#9E8D7A] absolute left-2 top-2" />
             </div>
           </div>
         </div>
 
         {/* Historical Batch Trends Chart */}
         {chartData.length > 0 && (
-          <div className="bg-[#17181D] border border-[#252830] rounded-lg p-2.5 mb-3">
-            <div className="flex items-center justify-between mb-1.5 text-[10px] font-mono text-[#A6987E]">
+          <div className="bg-[#F2EDE6] border border-[#D4C9B8] rounded-xl p-3 mb-3">
+            <div className="flex items-center justify-between mb-1.5 text-[10px] font-mono text-[#6B5C4C]">
               <span className="flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-[#D97706]" />
+                <TrendingUp className="w-3.5 h-3.5 text-[#C2601F]" />
                 HISTORICAL BATCH RECORD TRENDS
               </span>
               <div className="flex gap-3">
-                <span className="text-amber-400">■ Temp (°C)</span>
-                <span className="text-red-400">■ Thermal Peak</span>
-                <span className="text-orange-400">■ Gas Risk Index</span>
+                <span className="text-[#C2601F]">■ Temp (°C)</span>
+                <span className="text-red-600">■ Thermal Peak</span>
+                <span className="text-amber-600">■ Gas Risk Index</span>
               </div>
             </div>
 
             <div className="h-24 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 2, right: 10, left: -25, bottom: 0 }}>
-                  <XAxis dataKey="time" stroke="#7E766B" fontSize={8} tickLine={false} />
-                  <YAxis stroke="#7E766B" fontSize={8} tickLine={false} />
+                  <XAxis dataKey="time" stroke="#9E8D7A" fontSize={8} tickLine={false} />
+                  <YAxis stroke="#9E8D7A" fontSize={8} tickLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#121316',
-                      borderColor: '#252830',
-                      borderRadius: '0.375rem',
+                      backgroundColor: '#FAF7F4',
+                      borderColor: '#D4C9B8',
+                      borderRadius: '0.5rem',
                       fontSize: '10px',
-                      fontFamily: 'ui-monospace, monospace'
+                      fontFamily: 'ui-monospace, monospace',
+                      color: '#1A1612'
                     }}
                   />
-                  <Area type="monotone" dataKey="temp" stroke="#F59E0B" fill="#F59E0B" fillOpacity={0.15} strokeWidth={1.5} />
-                  <Area type="monotone" dataKey="thermal" stroke="#EF4444" fill="#EF4444" fillOpacity={0.1} strokeWidth={1.5} />
+                  <Area type="monotone" dataKey="temp" stroke="#C2601F" fill="#C2601F" fillOpacity={0.15} strokeWidth={1.5} />
+                  <Area type="monotone" dataKey="thermal" stroke="#DC2626" fill="#DC2626" fillOpacity={0.1} strokeWidth={1.5} />
                   <Area type="monotone" dataKey="gas" stroke="#D97706" fill="#D97706" fillOpacity={0.1} strokeWidth={1.5} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -179,9 +180,9 @@ export default function DataLogSection({
         )}
 
         {/* Batch Records Table */}
-        <div className="overflow-x-auto max-h-52 border border-[#252830] rounded-lg bg-[#14151A]">
+        <div className="overflow-x-auto max-h-52 border border-[#D4C9B8] rounded-xl bg-[#FAF7F4]">
           <table className="w-full text-left border-collapse text-xs font-mono">
-            <thead className="bg-[#1A1C23] text-[#A6987E] sticky top-0 border-b border-[#252830] text-[11px]">
+            <thead className="bg-[#F2EDE6] text-[#6B5C4C] sticky top-0 border-b border-[#D4C9B8] text-[11px]">
               <tr>
                 <th className="py-2 px-2.5">Time</th>
                 <th className="py-2 px-2">Batch</th>
@@ -196,36 +197,36 @@ export default function DataLogSection({
                 <th className="py-2 px-2">Confidence</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#252830] text-[11px]">
+            <tbody className="divide-y divide-[#D4C9B8] text-[11px]">
               {filteredBatches.length > 0 ? (
                 filteredBatches.map((b) => (
-                  <tr key={b.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-1.5 px-2.5 text-[#EAE2D5] whitespace-nowrap">{b.time}</td>
-                    <td className="py-1.5 px-2 font-bold text-[#D97706] whitespace-nowrap">{b.id}</td>
-                    <td className="py-1.5 px-2 text-[#EAE2D5]">{b.temp}°C</td>
-                    <td className="py-1.5 px-2 text-zinc-300">{b.mq2_index}%</td>
-                    <td className="py-1.5 px-2 text-zinc-300">{b.mq5_index}%</td>
+                  <tr key={b.id} className="hover:bg-[#EDE8E0] transition-colors">
+                    <td className="py-1.5 px-2.5 text-[#1A1612] whitespace-nowrap">{b.time}</td>
+                    <td className="py-1.5 px-2 font-bold text-[#C2601F] whitespace-nowrap">{b.id}</td>
+                    <td className="py-1.5 px-2 text-[#1A1612]">{b.temp}°C</td>
+                    <td className="py-1.5 px-2 text-[#4A3C30]">{b.mq2_index}%</td>
+                    <td className="py-1.5 px-2 text-[#4A3C30]">{b.mq5_index}%</td>
                     <td className="py-1.5 px-2">
-                      <span className={`px-1.5 py-0.2 rounded text-[10px] ${
-                        b.smoke_status === 'HIGH' ? 'bg-red-950 text-red-300' :
-                        b.smoke_status === 'MEDIUM' ? 'bg-amber-950 text-amber-300' :
-                        'bg-zinc-800 text-zinc-400'
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                        b.smoke_status === 'HIGH' ? 'bg-red-100 text-red-800' :
+                        b.smoke_status === 'MEDIUM' ? 'bg-amber-100 text-amber-800' :
+                        'bg-[#E5DFD6] text-[#6B5C4C]'
                       }`}>
                         {b.smoke_status}
                       </span>
                     </td>
                     <td className="py-1.5 px-2">
-                      <span className={`px-1.5 py-0.2 rounded text-[10px] ${
-                        b.flame_detected ? 'bg-red-950 text-red-300 font-bold' : 'text-zinc-500'
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] ${
+                        b.flame_detected ? 'bg-red-100 text-red-800 font-bold' : 'text-[#9E8D7A]'
                       }`}>
                         {b.flame_detected ? 'FLAME' : 'CLEAR'}
                       </span>
                     </td>
-                    <td className="py-1.5 px-2 text-amber-300">{b.thermal_max}°C</td>
-                    <td className="py-1.5 px-2 text-zinc-300">{b.battery_pct}%</td>
-                    <td className="py-1.5 px-2 text-zinc-400">{b.mode}</td>
+                    <td className="py-1.5 px-2 font-semibold text-amber-800">{b.thermal_max}°C</td>
+                    <td className="py-1.5 px-2 text-[#4A3C30]">{b.battery_pct}%</td>
+                    <td className="py-1.5 px-2 text-[#6B5C4C]">{b.mode}</td>
                     <td className="py-1.5 px-2 font-bold">
-                      <span className={b.fire_confidence > 50 ? 'text-red-400' : b.fire_confidence > 25 ? 'text-amber-400' : 'text-emerald-400'}>
+                      <span className={b.fire_confidence > 50 ? 'text-red-700' : b.fire_confidence > 25 ? 'text-amber-700' : 'text-emerald-700'}>
                         {b.fire_confidence}%
                       </span>
                     </td>
@@ -233,7 +234,7 @@ export default function DataLogSection({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={11} className="py-6 text-center text-[#7E766B]">
+                  <td colSpan={11} className="py-6 text-center text-[#9E8D7A]">
                     No batch records matching filter criteria.
                   </td>
                 </tr>
@@ -243,7 +244,7 @@ export default function DataLogSection({
         </div>
       </div>
 
-      <div className="text-[10px] text-[#7E766B] font-mono pt-2 border-t border-[#252830] flex justify-between items-center">
+      <div className="text-[10px] text-[#9E8D7A] font-mono pt-2 mt-2 border-t border-[#D4C9B8] flex justify-between items-center">
         <span>Storage Target: Firestore Collection &quot;batches&quot; + Local Cache</span>
         <span>Records: {filteredBatches.length} Batches</span>
       </div>
