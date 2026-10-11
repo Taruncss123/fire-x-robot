@@ -170,3 +170,5 @@ MQTT_BROKER_URL=mqtt://broker.emqx.io:1883
 - [x] **AMG8833 Thermal Heatmap**: Smooth canvas interpolation with iron/inferno palette, max temp, hotspot direction, and target crosshair.
 - [x] **5-Minute Telemetry Log**: Stored batch records, trend graph, and instant CSV export button.
 - [x] **Built-in Demo Simulator**: Complete fire incident scenario (gas rise → thermal hotspot → fire confirmation → water suppression → cool-down).
+#   f i r e - x - r o b o t - 2  
+ 
